@@ -1,19 +1,20 @@
 // Keep track of our socket connection
 var socket;
 let ellipses = [];
-let message = "Click to add a circle";
+let IncomingMessage = "";
+let OutgoingMessage = "";
+
 let inputBox;
 let submitButton;
 
 function setup() {
-  createCanvas(800, 500);
+  createCanvas(400, 500);
   background(0);
 
-  
   // Start a socket connection to the server
   // socket = io.connect("http://chriscalver.com:8080");
-  socket = io.connect('http://localhost:8080');
-  
+  socket = io.connect("http://localhost:8080");
+
   // We make a named event called 'mouse' and write an anonymous callback function
   socket.on(
     "mouse",
@@ -29,9 +30,13 @@ function setup() {
         targetY: 490,
         color: color(0, 0, 255),
       });
-      message = "Someone added a circle";
+      // IncomingMessage = "Someone added a circle";
     }
   );
+  socket.on("message", function (data) {
+    console.log("Got message: " + data);
+    IncomingMessage = "Incoming Msg: " + data;
+  });
 
   // Create an input box below the canvas
   inputBox = createInput("Enter text here");
@@ -44,12 +49,12 @@ function setup() {
 
   // Clear input box text when clicked
   inputBox.mousePressed(() => {
-    inputBox.value('');
+    inputBox.value("");
   });
 
   // Make hitting Enter act like clicking the submit button
-  inputBox.elt.addEventListener('keypress', (event) => {
-    if (event.key === 'Enter') {
+  inputBox.elt.addEventListener("keypress", (event) => {
+    if (event.key === "Enter") {
       handleSubmit();
     }
   });
@@ -60,7 +65,9 @@ function draw() {
   textFont("Arial");
   fill("white");
   textSize(18);
-  text(message, 35, 55);
+  
+  text(IncomingMessage, 35, 55);
+  text(OutgoingMessage, 235, 155);
   // Update and draw each ellipse
   for (let i = 0; i < ellipses.length; i++) {
     let e = ellipses[i];
@@ -75,22 +82,16 @@ function draw() {
 
 function handleSubmit() {
   let inputValue = inputBox.value();
-  console.log("Submitted: " + inputValue);
-  message = "Submitted: " + inputValue;
+  console.log("You Submitted: " + inputValue);
+  OutgoingMessage = "You Said: " + inputValue;
   socket.emit("message", inputValue);
 }
 
 function mouseClicked() {
   if (mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) {
     return;
-  }
-  // Draw some white circles
-  // fill(25);
-  // noStroke();
-  // ellipse(mouseX, mouseY, 20, 20);
-  // Send the mouse coordinates
+  } 
   sendmouse(mouseX, mouseY);
-
   // Add the ellipse to the array with its initial and target positions
   ellipses.push({
     x: mouseX,
@@ -98,7 +99,7 @@ function mouseClicked() {
     targetY: 490,
     color: color(255, 255, 0),
   });
-  message = "You added a circle";
+  // IncomingMessage = "You added a circle";
 }
 
 // Function for sending to the socket

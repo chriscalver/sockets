@@ -34,7 +34,7 @@ io.sockets.on(
     });
 
     socket.on("message", function (data) {
-      console.log("Received: 'message' " + data);
+      console.log("Msg: " + data);
       // Send it to all other clients
       socket.broadcast.emit("message", data); // send to everyone including sender
       // socket.emit('mouse', data);    // send to sender
