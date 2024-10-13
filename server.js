@@ -33,6 +33,13 @@ io.sockets.on(
       // socket.emit('mouse', data);    // send to sender only
     });
 
+    socket.on("message", function (data) {
+      console.log("Received: 'message' " + data);
+      // Send it to all other clients
+      socket.broadcast.emit("message", data); // send to everyone including sender
+      // socket.emit('mouse', data);    // send to sender
+    });
+
     socket.on("disconnect", function () {
       console.log("Client has disconnected");
     });
