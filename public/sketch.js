@@ -3,13 +3,19 @@ var socket;
 let ellipses = [];
 let IncomingMessage = "";
 let OutgoingMessage = "";
-
+let manifest = "Welcome to the P5.js Socket.IO Chat App";
 let inputBox;
 let submitButton;
 
+let incomingBubble = false;
+let outgoingBubble = false;
+let headerBubble = true;
+
 function setup() {
-  createCanvas(400, 500);
+  createCanvas(500, 500);
   background(0);
+  textSize(18);
+  textFont("Arial");
 
   // Start a socket connection to the server
   // socket = io.connect("http://chriscalver.com:8080");
@@ -35,7 +41,8 @@ function setup() {
   );
   socket.on("message", function (data) {
     console.log("Got message: " + data);
-    IncomingMessage = "Incoming Msg: " + data;
+    IncomingMessage = "Anonymous: " + data;
+    incomingBubble = true;
   });
 
   // Create an input box below the canvas
@@ -61,13 +68,38 @@ function setup() {
 }
 
 function draw() {
-  background(0); // Clear the canvas with a background color
-  textFont("Arial");
-  fill("white");
-  textSize(18);
-  
-  text(IncomingMessage, 35, 55);
-  text(OutgoingMessage, 235, 155);
+  background(0);
+
+
+  if (headerBubble) {
+    fill(255, 255, 255); // bubble background white
+    stroke(0, 255, 0); // border color green
+    strokeWeight(5);
+    rect(20, 20, 250, 60);
+    fill(1, 133, 225); // text color blue
+    noStroke();  
+    text(manifest, 20, 20, 250, 100);
+  }
+
+  if (outgoingBubble) {
+    stroke(0, 255, 0); // border color green
+    rect(225, 355, 250, 60);
+    noStroke();
+    fill(255, 255, 255); // text color white
+    text(OutgoingMessage, 225, 375);
+    noStroke();
+  }
+
+  if (incomingBubble) {
+     stroke(0, 255, 0); // border color green
+    fill(137, 165, 5); // bubble background
+    rect(20, 240, 250 , 60);
+    noStroke();
+    fill(255, 255, 255); // text color white
+    text(IncomingMessage, 20, 255);
+    noStroke();
+  }
+
   // Update and draw each ellipse
   for (let i = 0; i < ellipses.length; i++) {
     let e = ellipses[i];
@@ -83,14 +115,15 @@ function draw() {
 function handleSubmit() {
   let inputValue = inputBox.value();
   console.log("You Submitted: " + inputValue);
-  OutgoingMessage = "You Said: " + inputValue;
+  OutgoingMessage = "You: " + inputValue;
   socket.emit("message", inputValue);
+  outgoingBubble = true;
 }
 
 function mouseClicked() {
   if (mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) {
     return;
-  } 
+  }
   sendmouse(mouseX, mouseY);
   // Add the ellipse to the array with its initial and target positions
   ellipses.push({
